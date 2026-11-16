@@ -113,14 +113,17 @@ export function updateHud(state, hud) {
     e.feed.innerHTML = feedHtml;
   }
 
-  // Round banner shows while its timer runs.
-  const showBanner = state.elapsed < r.bannerUntil;
+  // Round banner shows while its timer runs — but never over the title
+  // screen, where it would collide with the title card text.
+  const titleShown = !state.running && r.phase !== 'matchover';
+  const showBanner = state.elapsed < r.bannerUntil && !titleShown;
   e.banner.style.opacity = showBanner ? '1' : '0';
   if (showBanner) setText(hud, 'banner', e.bannerText, r.banner);
 
   // Buy menu: visible during the buy phase when open; rows dim when
   // unaffordable, so the player sees what they can afford at a glance.
-  const showBuy = r.phase === 'buy' && r.buyOpen;
+  // Hidden under the title screen so the shop never bleeds through it.
+  const showBuy = r.phase === 'buy' && r.buyOpen && !titleShown;
   e.buyMenu.style.display = showBuy ? 'block' : 'none';
   if (showBuy) {
     const buyKey = `buy-${r.money}-${w.id}-${p.kevlar}-${p.grenades}`;
