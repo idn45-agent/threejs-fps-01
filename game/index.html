@@ -92,6 +92,44 @@
     background: radial-gradient(ellipse at center, transparent 55%, rgba(229,72,77,.55) 100%);
   }
 
+  /* Buy menu: keyboard shop during the buy phase (B toggles, 1-6 buy). */
+  #buy-menu {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 420px; background: var(--panel); border: 1px solid rgba(233,230,223,.2);
+    border-radius: 6px; padding: 18px 20px; display: none; z-index: 5;
+  }
+  #buy-menu h2 { margin: 0 0 4px; font-size: 15px; letter-spacing: .18em; color: var(--amber); }
+  #buy-menu .sub { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .buy-row { font-size: 14px; padding: 6px 2px; border-top: 1px solid rgba(233,230,223,.1); }
+  .buy-row b { font-family: var(--font-readout); color: var(--teal); margin-right: 8px; }
+  .buy-row span { display: block; font-size: 12px; color: var(--muted); margin-left: 22px; }
+
+  /* Objective bar: plant/defuse progress and the live charge countdown. */
+  #objective {
+    position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%);
+    width: 300px; text-align: center; display: none;
+  }
+  #objective-label { font-size: 12px; letter-spacing: .14em; margin-bottom: 6px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+  #objective-bar { height: 8px; background: rgba(233,230,223,.18); border-radius: 4px; overflow: hidden; }
+  #objective-fill { height: 100%; width: 0; background: var(--teal); }
+
+  #gear-line { font-size: 11px; letter-spacing: .1em; color: var(--amber); margin-top: 4px; min-height: 13px; }
+
+  /* Match-end screen: result and a restart button. */
+  #match-end {
+    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, rgba(43,35,64,.85), rgba(20,16,14,.9));
+    pointer-events: auto; z-index: 10;
+  }
+  #match-end-card { text-align: center; padding: 36px 44px; }
+  #match-end-text { font-size: 30px; font-weight: 700; letter-spacing: .1em; }
+  #match-end-card p { color: var(--muted); }
+  #restart-btn {
+    font: 600 16px var(--font-ui); letter-spacing: .1em; color: #14100e;
+    background: var(--teal); border: 0; border-radius: 4px; padding: 12px 30px; cursor: pointer; margin-top: 10px;
+  }
+  #restart-btn:hover { background: #5fe0d2; }
+
   /* Title screen: name, premise, controls, one play button. */
   #title-screen {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -134,9 +172,10 @@
     <div id="health-bar"><div id="health-fill"></div></div>
   </div>
   <div id="ammo-panel" class="panel">
-    <span id="ammo-mag">30</span>
-    <span id="ammo-reserve">/ 120</span>
-    <div id="weapon-name">VK-7 LONGSHOT</div>
+    <span id="ammo-mag">12</span>
+    <span id="ammo-reserve">/ 48</span>
+    <div id="weapon-name">P-12 SIDEARM</div>
+    <div id="gear-line"></div>
   </div>
   <div id="top-panel" class="panel">
     <div id="round-label">ROUND 1</div>
@@ -147,14 +186,30 @@
   <div id="feed"></div>
   <div id="banner"><div id="banner-text"></div></div>
   <div id="damage-vignette"></div>
+  <div id="buy-menu">
+    <h2>BUY PHASE</h2>
+    <div class="sub">Press 1–6 to buy &middot; B to close &middot; round starts when the timer ends</div>
+    <div id="buy-list"></div>
+  </div>
+  <div id="objective">
+    <div id="objective-label"></div>
+    <div id="objective-bar"><div id="objective-fill"></div></div>
+  </div>
+</div>
+<div id="match-end">
+  <div id="match-end-card">
+    <div id="match-end-text"></div>
+    <p>First to 5 rounds takes the match. Play again?</p>
+    <button id="restart-btn">PLAY AGAIN</button>
+  </div>
 </div>
 <div id="title-screen">
   <div id="title-card">
     <h1>DUST<span>LINE</span></h1>
     <div class="tag">TACTICAL FPS &middot; EMBER YARD</div>
-    <p>One operative against the defenders of Ember Yard. Clear both bomb
-    sites — A to the north, B to the south — or run the clock out. Stop to
-    aim: moving fire sprays, still fire lands.</p>
+    <p>One operative and a teammate against four defenders of Ember Yard.
+    Plant the charge at site A or B — hold E inside the ring — and guard it
+    for 35 seconds, or drop every defender. First to 5 rounds wins the match.</p>
     <div class="controls">
       <div><b>W A S D</b> &nbsp;move</div>
       <div><b>Mouse</b> &nbsp;look</div>
@@ -163,10 +218,14 @@
       <div><b>Space</b> &nbsp;jump</div>
       <div><b>Click</b> &nbsp;fire</div>
       <div><b>R</b> &nbsp;reload</div>
+      <div><b>B</b> &nbsp;buy menu (buy phase)</div>
+      <div><b>E</b> &nbsp;plant / defuse (hold)</div>
+      <div><b>G</b> &nbsp;throw grenade</div>
+      <div><b>1–6</b> &nbsp;buy item</div>
       <div><b>Esc</b> &nbsp;release mouse</div>
     </div>
     <button id="play-btn">CLICK TO PLAY</button>
-    <div class="hint">Headshots deal double damage. Three dummies hold the yard — drop them all to win the round.</div>
+    <div class="hint">Headshots deal double damage. Kills pay $300, round wins $325 — spend it in the buy phase. Your teammate Sable fights beside you.</div>
   </div>
 </div>
 <script type="module" src="./src/main.js"></script>

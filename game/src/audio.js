@@ -98,5 +98,28 @@ export function createAudio() {
     plant() {
       tone(980, 0.08, 0.2, 'square');
     },
+    // A bot's shot, quieter and duller with distance.
+    botShot(dist) {
+      const v = Math.max(0.08, 0.35 - (dist || 0) * 0.006);
+      burst(0.1, 1600, v);
+    },
+    throwGrenade() {
+      tone(500, 0.08, 0.2, 'sine', 300);
+    },
+    explosion() {
+      burst(0.5, 400, 0.9);
+      tone(90, 0.5, 0.7, 'sine', 35);
+    },
+    // The planted charge beeps once a second until it blows.
+    beep() {
+      tone(1200, 0.07, 0.25, 'square');
+    },
+    buy() {
+      tone(880, 0.07, 0.25, 'triangle');
+      setTimeout(() => tone(1320, 0.09, 0.25, 'triangle'), 80);
+    },
+    deny() {
+      tone(220, 0.12, 0.25, 'square', 160);
+    },
   };
 }

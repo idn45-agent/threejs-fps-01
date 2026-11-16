@@ -11,6 +11,9 @@ export function createInput(canvas) {
     // edge-triggered actions, consumed by whoever reads them
     jumpQueued: false,
     reloadQueued: false,
+    fireQueued: false, // one fresh trigger pull (semi-auto weapons)
+    grenadeQueued: false, // G: throw an R-4
+    buyToggleQueued: false, // B: open/close the buy menu
 
     lock() {
       canvas.requestPointerLock();
@@ -36,6 +39,8 @@ export function createInput(canvas) {
       e.preventDefault();
     }
     if (e.code === 'KeyR') input.reloadQueued = true;
+    if (e.code === 'KeyG') input.grenadeQueued = true;
+    if (e.code === 'KeyB') input.buyToggleQueued = true;
   });
   window.addEventListener('keyup', (e) => input.keys.delete(e.code));
   window.addEventListener('blur', () => input.keys.clear());
@@ -49,7 +54,10 @@ export function createInput(canvas) {
     input.mouseDY += e.movementY;
   });
   canvas.addEventListener('mousedown', (e) => {
-    if (e.button === 0) input.firing = true;
+    if (e.button === 0) {
+      input.firing = true;
+      input.fireQueued = true; // semi-auto weapons fire on the edge
+    }
   });
   window.addEventListener('mouseup', (e) => {
     if (e.button === 0) input.firing = false;

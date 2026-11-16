@@ -25,36 +25,51 @@ export function createState() {
       radius: 0.38,
       eyeStanding: 1.62,
       eyeCrouched: 1.08,
+      kevlar: false, // Part 2: buy menu; absorbs 30% of incoming damage
+      grenades: 0, // Part 2: R-4 grenades carried
     },
 
-    // The rifle (weapon.js owns the numbers)
+    // The weapon (weapon.js owns the numbers; buy.js changes the table row)
     weapon: {
-      name: 'VK-7 Longshot',
-      magSize: 30,
-      ammo: 30,
-      reserve: 120, // Part 2: the buy phase refills this from money
+      id: 'pistol', // Part 2: start on the free P-12; rifles are bought
+      name: 'P-12 Sidearm',
+      magSize: 12,
+      ammo: 12,
+      reserve: 48,
       reloading: false,
       reloadEndsAt: 0,
       lastShotAt: -10,
       bloom: 0, // current spread, radians; grows firing/moving, shrinks still
       recoil: 0, // accumulated pitch kick waiting to settle
       kills: 0,
+      deaths: 0,
     },
+
+    // Grenades in flight (weapon.js owns them)
+    grenades: [], // { pos, vel, fuseAt, mesh }
 
     // Opponents (bots.js owns the list)
     bots: [],
 
-    // Round (rounds.js owns the machine; Part 2 fills the buy phase in)
+    // Round (rounds.js owns the machine)
     round: {
       number: 1,
-      phase: 'live', // 'buy' | 'live' | 'over'
-      timer: ROUND_SECONDS,
+      phase: 'buy', // 'buy' | 'live' | 'over' | 'matchover'
+      timer: BUY_SECONDS,
       scoreYou: 0,
       scoreThem: 0,
       money: START_MONEY,
-      plant: null, // { site: 'A'|'B', plantedAt, defuseAt } once Part 2 adds it
+      losses: 0, // consecutive round losses (drives the loss bonus)
+      buyOpen: false, // buy menu visible during the buy phase
+      // The planted charge. plantProgress/defuseProgress are 0..1 holds.
+      plant: null, // { site, x, z, explodesAt, beepAt } once planted
+      plantProgress: 0,
+      defuseProgress: 0,
+      plantingSite: null, // 'A' | 'B' while the player stands in a site
+      defusing: false, // someone is holding E on the planted charge
       banner: '',
       bannerUntil: 0,
+      matchWinner: null, // 'you' | 'them' once the match is decided
     },
 
     // Feed + transient UI events (hud.js drains these)

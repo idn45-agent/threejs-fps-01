@@ -9,8 +9,8 @@ import { createInput } from './input.js';
 import { updatePlayer, eyePosition, lookDirection } from './player.js';
 import { createWeapon, updateWeapon } from './weapon.js';
 import { createAudio } from './audio.js';
-import { spawnBots, updateBots, listHitMeshes, damageBot } from './bots.js';
-import { startRound, updateRounds } from './rounds.js';
+import { spawnBots, updateBots, listHitMeshes, damageBot, hearShot } from './bots.js';
+import { startBuyPhase, updateRounds, resetMatch } from './rounds.js';
 import { createHud, updateHud } from './hud.js';
 
 const STEP = 1 / 60; // fixed simulation step
@@ -46,6 +46,7 @@ const view = {
   bots: {
     listHitMeshes: () => listHitMeshes(state),
     damageBot: (id, dmg, head) => damageBot(state, id, dmg, head),
+    hearShot: (s, x, z) => hearShot(s, x, z),
   },
 };
 
@@ -70,6 +71,10 @@ function startPlaying() {
   state.running = true;
 }
 hud.els.playBtn.addEventListener('click', startPlaying);
+hud.els.restartBtn.addEventListener('click', () => {
+  resetMatch(state, audio);
+  startPlaying();
+});
 canvas.addEventListener('click', () => {
   if (!state.running) startPlaying();
 });
@@ -94,10 +99,21 @@ let last = performance.now();
 
 function step(dt) {
   state.elapsed += dt;
-  updatePlayer(state, input, dt);
-  updateWeapon(state, input, dt, view);
-  updateBots(state, dt);
-  updateRounds(state, dt, audio);
+  // The player, weapon and bots only simulate during a live round: the
+  // buy phase freezes the player at spawn, the banner pauses the fight.
+  const live = state.round.phase === 'live';
+  if (live) {
+    updatePlayer(state, input, dt);
+    updateWeapon(state, input, dt, view);
+    updateBots(state, dt, { audio });
+  }
+  updateRounds(state, dt, audio, input);
+  // Match over: release the mouse so the restart button is clickable.
+  if (state.round.phase === 'matchover' && state.running) {
+    state.running = false;
+    input.unlock();
+    input.firing = false;
+  }
 }
 
 function frame(now) {
@@ -128,8 +144,9 @@ function frame(now) {
 }
 
 // Player starts at the attacker spawn, facing the sites down mid.
+// The match opens in the buy phase: shop first, then the round starts.
 state.player.pos.x = PLAYER_SPAWN.x;
 state.player.pos.z = PLAYER_SPAWN.z;
 state.player.yaw = PLAYER_SPAWN.yaw;
-startRound(state, null);
+startBuyPhase(state, null);
 requestAnimationFrame(frame);

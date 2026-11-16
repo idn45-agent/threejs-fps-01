@@ -94,6 +94,36 @@ function resolveAxis(pos, radius, axis) {
   }
 }
 
+// Line of sight: does the segment (x1,y1,z1)->(x2,y2,z2) clear every box?
+// Slab test per box; a box only blocks when the segment crosses it below
+// its top. Bots use this to decide whether they can see the player.
+export function losBlocked(x1, y1, z1, x2, y2, z2) {
+  const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+  for (const b of BOXES) {
+    const [bx1, bz1, bx2, bz2, h] = b;
+    let t0 = 0, t1 = 1;
+    const axes = [
+      [x1, dx, bx1, bx2],
+      [y1, dy, 0, h],
+      [z1, dz, bz1, bz2],
+    ];
+    let hit = true;
+    for (const [o, d, lo, hi] of axes) {
+      if (Math.abs(d) < 1e-9) {
+        if (o < lo || o > hi) { hit = false; break; }
+      } else {
+        let a = (lo - o) / d, c = (hi - o) / d;
+        if (a > c) { const t = a; a = c; c = t; }
+        if (a > t0) t0 = a;
+        if (c < t1) t1 = c;
+        if (t0 > t1) { hit = false; break; }
+      }
+    }
+    if (hit && t0 <= 1 && t1 >= 0) return true;
+  }
+  return false;
+}
+
 export function buildWorld(scene) {
   const tex = makeTextures();
   const group = new THREE.Group();
